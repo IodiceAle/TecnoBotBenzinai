@@ -1,0 +1,12 @@
+se distanza maggiore di quanto posso fare per arrivare al benzinaio non considero il benzinaio e poi tra quelli raggiungibili confronto per trovare sia il più vicino che il puù econiomico
+
+DATI:
+nome
+consumo
+capienza
+tipo carburante
+quanta devo fare
+dove sono
+
+crare dataBase con una tabella unica o 2 una dei prezzi e una dei benzinai e una per utenti con dati
+alle 8:10 scarico csv cancello i db e salvo i dati solo self se coordinate null non metto
