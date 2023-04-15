@@ -1,2 +1,0 @@
-# Tecno
-repository per tecnologie
