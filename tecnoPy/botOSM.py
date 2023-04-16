@@ -25,7 +25,7 @@ class Telegram:
         update_id = response["result"][0]["update_id"]
         return chat_id, update_id
     
-    def downloadPrezzi(self,url):
+    def downloadPrezzi(self,url="https://www.mise.gov.it/images/exportCSV/prezzo_alle_8.csv"):
         """Download the CSV data from the URL and save it to a file."""
         response = requests.get(url)
         with open('prezzo_alle_8.csv', 'wb') as f:
@@ -43,7 +43,7 @@ class Telegram:
                 recordPrezzi.append(record)
         return recordPrezzi
 
-    def downloadBenziani(self,url):
+    def downloadBenziani(self,url="https://www.mise.gov.it/images/exportCSV/anagrafica_impianti_attivi.csv"):
         """Download the CSV data from the URL and save it to a file."""
         response = requests.get(url)
         with open('anagrafica_impianti_attivi.csv', 'wb') as f:
