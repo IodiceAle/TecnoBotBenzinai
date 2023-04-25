@@ -22,7 +22,6 @@ class MyThread(threading.Thread):
 
     def insert_data_from_csv(self):
         botOSM.Telegram.downloadBenziani(self)
-        botOSM.Telegram.downloadPrezzi(self)
         
         mydb = mysql.connector.connect(
             host="localhost",
@@ -65,30 +64,40 @@ class MyThread(threading.Thread):
                 cursor.execute('INSERT INTO impianto (idImpianto, gestore, bandiera, tipoImpianto, nomeImpianto, indirizzo, comune, provincia, latitudine, longitudine) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (idI, gest, band, tipoI, nomeI, ind, com, prov, lat, long))
             mydb.commit()
             cursor.close()
+            self.insert_data_from_csv2()
             
+    def insert_data_from_csv2(self): 
+        botOSM.Telegram.downloadPrezzi(self)
         
-    # # Truncate the 'prezzo' table
-    #     cursor.execute('TRUNCATE TABLE prezzo')
+        mydb = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="db_benzinai"
+        )
+        cursor = mydb.cursor()
+    # Truncate the 'prezzo' table
+        cursor.execute('TRUNCATE TABLE prezzo')
 
-    #     # Insert data from 'prezzo_alle_8.csv'
-    #     with open('prezzo_alle_8.csv') as csv_file:
-    #         csv_reader = csv.reader(csv_file, delimiter=';')
-    #         # Skip the header row
-    #         next(csv_reader)
+        # Insert data from 'prezzo_alle_8.csv'
+        with open('prezzo_alle_8.csv') as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=';')
+            # Skip the header row
+            next(csv_reader)
             
-    #         for row in csv_reader:
-    #             # Check if the ID is in the skipped_ids list
-    #             idI = int(row[0])
-    #             if idI in self.skipped_ids:
-    #                 continue  # skip this row
+            for row in csv_reader:
+                # Check if the ID is in the skipped_ids list
+                idI = int(row[0])
+                if idI in self.skipped_ids:
+                    continue  # skip this row
                 
-    #             # Get data from row
-    #             tipoC = row[1]
-    #             descC = row[2]
-    #             prezzo = float(row[3].replace(',', '.'))  # replace comma with dot as decimal separator
+                # Get data from row
+                tipoC = row[1]
+                descC = row[2]
+                prezzo = float(row[3].replace(',', '.'))  # replace comma with dot as decimal separator
                 
-    #             # Insert into database
-    #             cursor.execute('INSERT INTO prezzo (idImpianto, tipoCarburante, descrizioneCarburante, prezzo) VALUES (%s, %s, %s, %s)', (idI, tipoC, descC, prezzo))
+                # Insert into database
+                cursor.execute('INSERT INTO prezzo (idImpianto, tipoCarburante, descrizioneCarburante, prezzo) VALUES (%s, %s, %s, %s)', (idI, tipoC, descC, prezzo))
                 
-    #     mydb.commit()
-    #     cursor.close()
+        mydb.commit()
+        cursor.close()
