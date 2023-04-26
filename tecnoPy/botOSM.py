@@ -115,7 +115,7 @@ def handle_messages():
         # Wait for 5 seconds before checking for new messages again
         time.sleep(5)
     
-def downloadPrezzi(self,url="https://www.mise.gov.it/images/exportCSV/prezzo_alle_8.csv"):
+def downloadPrezzi(url="https://www.mise.gov.it/images/exportCSV/prezzo_alle_8.csv"):
         """Download the CSV data from the URL and save it to a file."""
         response = requests.get(url)
         with open('prezzo_alle_8.csv', 'wb') as f:
@@ -133,7 +133,7 @@ def downloadPrezzi(self,url="https://www.mise.gov.it/images/exportCSV/prezzo_all
                 recordPrezzi.append(record)
         return recordPrezzi
 
-def downloadBenziani(self,url="https://www.mise.gov.it/images/exportCSV/anagrafica_impianti_attivi.csv"):
+def downloadBenziani(url="https://www.mise.gov.it/images/exportCSV/anagrafica_impianti_attivi.csv"):
         """Download the CSV data from the URL and save it to a file."""
         response = requests.get(url)
         with open('anagrafica_impianti_attivi.csv', 'wb') as f:

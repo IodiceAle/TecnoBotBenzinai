@@ -21,22 +21,22 @@ class MyThread(threading.Thread):
                 time.sleep(10)
 
     def insert_data_from_csv(self):
-        botOSM.Telegram.downloadBenziani(self)
+        botOSM.downloadBenziani()
         
         mydb = mysql.connector.connect(
             host="localhost",
             user="root",
             password="",
-            database="db_benzinai"
+            database="benziani"
         )
         cursor = mydb.cursor()
         
         # drop foreign key constraint on prezzo table
-        cursor.execute('ALTER TABLE prezzo DROP FOREIGN KEY prezzo_ibfk_1')
+        cursor.execute('ALTER TABLE prezzi DROP FOREIGN KEY prezzi_ibfk_1')
         # truncate impianto table
         cursor.execute('TRUNCATE TABLE impianto')
         # recreate foreign key constraint on prezzo table
-        cursor.execute('ALTER TABLE prezzo ADD CONSTRAINT prezzo_ibfk_1 FOREIGN KEY (idImpianto) REFERENCES impianto (idImpianto)')
+        cursor.execute('ALTER TABLE prezzi ADD CONSTRAINT prezzi_ibfk_1 FOREIGN KEY (idImpianto) REFERENCES impianto (idImpianto)')
 
         with open('anagrafica_impianti_attivi.csv',encoding='utf-8') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=';')
@@ -61,43 +61,48 @@ class MyThread(threading.Thread):
                 lat=row[8]
                 long=row[9]
                 #insert in db
-                cursor.execute('INSERT INTO impianto (idImpianto, gestore, bandiera, tipoImpianto, nomeImpianto, indirizzo, comune, provincia, latitudine, longitudine) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (idI, gest, band, tipoI, nomeI, ind, com, prov, lat, long))
+                cursor.execute('INSERT INTO impianto (idImpianto, Gestore, Bandiera, tipoImpianto, nomeImpianto, Indirizzo, Comune, Provincia, Latitudine, Longitudine) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', (idI, gest, band, tipoI, nomeI, ind, com, prov, lat, long))
             mydb.commit()
             cursor.close()
             self.insert_data_from_csv2()
             
     def insert_data_from_csv2(self): 
-        botOSM.Telegram.downloadPrezzi(self)
+        botOSM.downloadPrezzi()
         
         mydb = mysql.connector.connect(
             host="localhost",
             user="root",
             password="",
-            database="db_benzinai"
+            database="benziani"
         )
         cursor = mydb.cursor()
     # Truncate the 'prezzo' table
-        cursor.execute('TRUNCATE TABLE prezzo')
+        cursor.execute('TRUNCATE TABLE prezzi')
 
         # Insert data from 'prezzo_alle_8.csv'
         with open('prezzo_alle_8.csv') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=';')
             # Skip the header row
             next(csv_reader)
+            next(csv_reader)
             
             for row in csv_reader:
                 # Check if the ID is in the skipped_ids list
                 idI = int(row[0])
-                if idI in self.skipped_ids:
+                if row[0] in self.skipped_ids:
                     continue  # skip this row
-                
+                # if int(row[3])!=1:
+                #     continue
                 # Get data from row
                 tipoC = row[1]
-                descC = row[2]
-                prezzo = float(row[3].replace(',', '.'))  # replace comma with dot as decimal separator
+                # descC = row[2]
+                prezzo = float(row[2].replace(',', '.'))  # replace comma with dot as decimal separator
                 
                 # Insert into database
-                cursor.execute('INSERT INTO prezzo (idImpianto, tipoCarburante, descrizioneCarburante, prezzo) VALUES (%s, %s, %s, %s)', (idI, tipoC, descC, prezzo))
+                try:
+                    cursor.execute('INSERT INTO prezzi ( tipoCarburante, prezzo, idImpianto) VALUES ( %s, %s, %s)', (tipoC, prezzo, idI))
+                except:
+                    print("An exception occurred")
                 
         mydb.commit()
         cursor.close()
