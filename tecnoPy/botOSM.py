@@ -25,13 +25,10 @@ def handle_messages():
     # Set the initial dictionary for user responses to an empty dictionary
     user_responses = {}
     # Set the list of parameters to ask
-    params = [
-        "nome",
-        "Quanto consuma il tuo veicolo in litri per 1 km?",
-        "Quanta capacità ha il tuo serbatoio?",
+    paramsUt = [
+        "Ciao! Per iniziare, dimmi il tuo nome.",
         "Che tipo di carburante usi?",
-        "Quanta strada puoi fare?",
-        "Dove sei ora?"
+        "Quanta capacità ha il tuo serbatoio? LITRI",
     ]
     # Set the initial index of the parameter we are currently asking for to 0
     param_index = 0
@@ -55,28 +52,36 @@ def handle_messages():
                     if waiting_for_response:
                         # We are waiting for a response from the user
                         if message_text != "":
-                            user_responses[params[param_index]] = message_text
+                            user_responses[paramsUt[param_index]] = message_text
                             param_index += 1
-                        if param_index == len(params):
-                            # We have received all the necessary responses
-                            # Insert the responses into the database
-                            # query = "INSERT INTO users (chat_id, user_id, nome, consumo, capacita, carburante, strada, posizione) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-                            # values = (chat_id, result["message"]["from"]["id"], user_responses["nome"], user_responses["Quanto consuma il tuo veicolo in litri per 1 km?"], user_responses["Quanta capacità ha il tuo serbatoio?"], user_responses["Che tipo di carburante usi?"], user_responses["Quanta strada puoi fare?"], user_responses["Dove sei ora?"])
-                            # cursor = db.cursor()
-                            # Execute the query and commit the changes
-                            # cursor.execute(query, values)
-                            # db.commit()
-                            # Send a confirmation message
-                            send_message(chat_id, "Grazie per aver fornito le informazioni richieste. Se hai bisogno di aiuto in futuro, non esitare a contattarci.")
-                            # Reset the flag for waiting for a response and the dictionary for user responses
-                            waiting_for_response = False
-                            user_responses = {}
-                            param_index = 0
+                        if param_index == len(paramsUt):
+                                mydb = mysql.connector.connect(
+                                    host="localhost",
+                                    user="root",
+                                    password="",
+                                    database="benziani"
+                                )
+                                cursor = mydb.cursor()
+                                # We have received all the necessary responses
+                                # Insert the responses into the database
+                                query = "INSERT INTO users (chatId, nome, user_id, tipoCarb, capacita) VALUES (%s, %s, %s, %s, %s)"
+                                values = (chat_id, result["message"]["from"]["id"], user_responses["Ciao! Per iniziare, dimmi il tuo nome."], user_responses["Che tipo di carburante usi?"],user_responses["Quanta capacità ha il tuo serbatoio? LITRI"])
+                                # Execute the query and commit the changes
+                                cursor.execute('DELETE FROM users WHERE chatId=chat_id')
+                                cursor.execute(query, values)
+                                mydb.commit()
+                                cursor.close()
+                                # Send a confirmation message
+                                send_message(chat_id, "Grazie per aver fornito le informazioni richieste.")
+                                # Reset the flag for waiting for a response and the dictionary for user responses
+                                waiting_for_response = False
+                                user_responses = {}
+                                param_index = 0
                         else:
-                            # We still need to ask for more parameters
-                            send_message(chat_id, params[param_index])
+                                # We still need to ask for more parameters
+                                send_message(chat_id, paramsUt[param_index])
                             
-                    elif message_text == "Sono un nuovo utente":
+                    elif message_text == "/nuovoutente":
                         # We have received the command to start asking for parameters
                         send_message(chat_id, "Ciao! Per iniziare, dimmi il tuo nome.")
                         # Set the flag for waiting for a response to True
@@ -85,29 +90,11 @@ def handle_messages():
                         # We have received a message that we don't understand
                         if waiting_for_response:
                             # We are waiting for a response from the user
-                            user_responses[params[param_index]] = message_text
+                            user_responses[paramsUt[param_index]] = message_text
                             param_index += 1
-                            if param_index == len(params):
-                                # We have received all the necessary responses
-                                # Insert the responses into the database
-                                # query = "INSERT INTO users (chat_id, user_id, nome, consumo, capacita, carburante, strada, posizione) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-                                # values = (chat_id, result["message"]["from"]["id"], user_responses["nome"], user_responses["Quanto consuma il tuo veicolo in litri per 1 km?"], user_responses["Quanta capacità ha il tuo serbatoio?"], user_responses["Che tipo di carburante usi?"], user_responses["Quanta strada puoi fare?"], user_responses["Dove sei ora?"])
-                                # cursor = db.cursor()
-                                # Execute the query and commit the changes
-                                # cursor.execute(query, values)
-                                # db.commit()
-                                # Send a confirmation message
-                                send_message(chat_id, "Grazie per aver fornito le informazioni richieste. Se hai bisogno di aiuto in futuro, non esitare a contattarci.")
-                                # Reset the flag for waiting for a response and the dictionary for user responses
-                                waiting_for_response = False
-                                user_responses = {}
-                                param_index = 0
-                            else:
-                                # We still need to ask for more parameters
-                                send_message(chat_id, params[param_index])
                         else:
                             # We are not waiting for a response from the user, and we don't understand the message
-                            send_message(chat_id, "Non ho capito. Per iniziare, digita \"Sono un nuovo utente\".")
+                            send_message(chat_id, "Non ho capito. Per iniziare, digita \"/nuovoutente\".")
 
                             
                 # Set the new offset to the ID of the last message we received plus 1

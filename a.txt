@@ -1,0 +1,6 @@
+mnca la parte della richiesta del cerca benzianio
+	opensteetmap posizione utente
+	calcolo il più vicino in base alla provincia
+	se distanza < quanto posso fare km gli scrivo questa opzione
+
+problema nel carico nel db dal csv
