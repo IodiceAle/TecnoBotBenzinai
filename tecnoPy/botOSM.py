@@ -65,14 +65,15 @@ def handle_messages():
                                 # We have received all the necessary responses
                                 # Insert the responses into the database
                                 query = "INSERT INTO users (chatId, nome, user_id, tipoCarb, capacita) VALUES (%s, %s, %s, %s, %s)"
-                                values = (chat_id, result["message"]["from"]["id"], user_responses["Ciao! Per iniziare, dimmi il tuo nome."], user_responses["Che tipo di carburante usi?"],user_responses["Quanta capacità ha il tuo serbatoio? LITRI"])
+                                values = (chat_id, user_responses["Ciao! Per iniziare, dimmi il tuo nome."], result["message"]["from"]["id"], user_responses["Che tipo di carburante usi?"],user_responses["Quanta capacità ha il tuo serbatoio? LITRI"])
                                 # Execute the query and commit the changes
-                                cursor.execute('DELETE FROM users WHERE chatId=chat_id')
+                                cursor.execute('DELETE FROM users WHERE chatId=chatId')
+                                mydb.commit()
                                 cursor.execute(query, values)
                                 mydb.commit()
                                 cursor.close()
                                 # Send a confirmation message
-                                send_message(chat_id, "Grazie per aver fornito le informazioni richieste.")
+                                send_message(chat_id, "Grazie per aver fornito le informazioni richieste. Ora puoi cercare il benzinaio più vicino con /cercabenzinaio .")
                                 # Reset the flag for waiting for a response and the dictionary for user responses
                                 waiting_for_response = False
                                 user_responses = {}
@@ -81,7 +82,9 @@ def handle_messages():
                                 # We still need to ask for more parameters
                                 send_message(chat_id, paramsUt[param_index])
                             
-                    elif message_text == "/nuovoutente":
+                    elif message_text == "/start":
+                        send_message(chat_id, "Per iniziare, digita \"/nuovoutente\" oppure \"/cercabenzinaio\" se sei già registrato.")
+                    elif message_text== "/nuovoutente":
                         # We have received the command to start asking for parameters
                         send_message(chat_id, "Ciao! Per iniziare, dimmi il tuo nome.")
                         # Set the flag for waiting for a response to True
@@ -94,7 +97,7 @@ def handle_messages():
                             param_index += 1
                         else:
                             # We are not waiting for a response from the user, and we don't understand the message
-                            send_message(chat_id, "Non ho capito. Per iniziare, digita \"/nuovoutente\".")
+                            send_message(chat_id, "Per iniziare, digita \"/start\".")
 
                             
                 # Set the new offset to the ID of the last message we received plus 1

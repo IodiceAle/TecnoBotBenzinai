@@ -10,15 +10,15 @@ class MyThread(threading.Thread):
         self.skipped_ids = []
 
     def run(self):
-        while True:
-            now = time.localtime()
-            if now.tm_hour == 8 and now.tm_min == 10:
+        # while True:
+            # now = time.localtime()
+            # if now.tm_hour == 8 and now.tm_min == 10:
                 self.insert_data_from_csv()
                 # Wait for 24 hours before checking again
-                time.sleep(24 * 60 * 60)
-            else:
+                # time.sleep(24 * 60 * 60)
+            # else:
                 # Wait for 10 seconds before checking again
-                time.sleep(10)
+                # time.sleep(10)
 
     def insert_data_from_csv(self):
         botOSM.downloadBenziani()
@@ -80,7 +80,7 @@ class MyThread(threading.Thread):
         cursor.execute('TRUNCATE TABLE prezzi')
 
         # Insert data from 'prezzo_alle_8.csv'
-        with open('prezzo_alle_8.csv') as csv_file:
+        with open('prezzo_alle_8.csv',encoding='utf-8') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=';')
             # Skip the header row
             next(csv_reader)
