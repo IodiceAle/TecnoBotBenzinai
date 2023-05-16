@@ -100,7 +100,7 @@ class MyThread(threading.Thread):
                 
                 # Insert into database
                 try:
-                    cursor.execute('INSERT INTO prezzi ( tipoCarburante, prezzo, idImpianto) VALUES ( %s, %s, %s)', (tipoC, prezzo, idI))
+                    cursor.execute('INSERT IGNORE INTO prezzi ( tipoCarburante, prezzo, idImpianto) VALUES ( %s, %s, %s)', (tipoC, prezzo, idI))
                 except:
                     print("An exception occurred")
                 
