@@ -34,8 +34,8 @@ def handle_messages():
     ]
     
     params2 = [
-        "Inviami la posizione o scrivendo dove ti trovi o con la posizione di Telegram.",
-        "Quanto carburante devi fare? (1/4, 2/4, 3,4, 4/4 di pieno)"
+        "Inviami la posizione dove ti trovi con la posizione di Telegram.",
+        "Quanto carburante devi fare? (1/4, 2/4, 3,4 di pieno)"
     ]
     # Set the initial index of the parameter we are currently asking for to 0
     param_index = 0
@@ -95,15 +95,16 @@ def handle_messages():
                                 result = cursor.fetchone()
                                 tCarb = result[0]
                                 # fuel_type, km_per_liter, my_pos, max_distance, fuel_left
-                                if (user_responses["Quanto carburante devi fare? (1/4, 2/4, 3,4, 4/4 di pieno)"]=="1/4"):
+                                if (user_responses["Quanto carburante devi fare? (1/4, 2/4, 3,4 di pieno)"]=="1/4"):
                                     fuel_remaining=capacita-(capacita/4)
-                                if (user_responses["Quanto carburante devi fare? (1/4, 2/4, 3,4, 4/4 di pieno)"]=="2/4"):
+                                if (user_responses["Quanto carburante devi fare? (1/4, 2/4, 3,4 di pieno)"]=="2/4"):
                                     fuel_remaining=capacita/2
-                                if (user_responses["Quanto carburante devi fare? (1/4, 2/4, 3,4, 4/4 di pieno)"]=="3/4"):
+                                if (user_responses["Quanto carburante devi fare? (1/4, 2/4, 3,4 di pieno)"]=="3/4"):
                                     fuel_remaining=capacita-((capacita/4)*3)
                                 max_distance=fuel_remaining*eff
-                                nome,distanza,prezzo=get_nearest_gas_station(tCarb,eff,user_responses["Inviami la posizione o scrivendo dove ti trovi o con la posizione di Telegram."],max_distance,fuel_remaining)
+                                nome,distanza,prezzo=get_nearest_gas_station(tCarb,user_responses["Inviami la posizione dove ti trovi con la posizione di Telegram."],max_distance)
                                 send_message(chat_id, ("Nome Benzianio: "+str(nome)+"\nDistanza in KM: "+str(distanza)+"\nPrezzo: "+str(prezzo)))
+                                waiting_for_response2=False
                             else:
                                 # We still need to ask for more parameters
                                 send_message(chat_id, params2[param_index2])
@@ -133,7 +134,7 @@ def handle_messages():
                                 # We have received all the necessary responses
                                 # Insert the responses into the database
                                 query = "INSERT INTO users (chatId, nome, user_id, tipoCarb, capacita,efficenza) VALUES (%s, %s, %s, %s, %s,%s)"
-                                values = (chat_id, user_responses["Ciao! Per iniziare, dimmi il tuo nome."], result["message"]["from"]["id"], user_responses["Che tipo di carburante usi?"],user_responses["Quanta capacità ha il tuo serbatoio? LITRI"],user_responses["Quanti KM riesci a fare con 1 LITRO?"])
+                                values = (chat_id, user_responses["Ciao! Per iniziare, dimmi il tuo nome."], result["message"]["from"]["id"], user_responses["Che tipo di carburante usi?"].lower(),user_responses["Quanta capacità ha il tuo serbatoio? LITRI"],user_responses["Quanti KM riesci a fare con 1 LITRO?"])
                                 # Execute the query and commit the changes
                                 cursor.execute('DELETE FROM users WHERE chatId=chatId')
                                 mydb.commit()
@@ -173,7 +174,7 @@ def handle_messages():
 
                                 if result:
                                     # We have received the command to start asking for parameters
-                                    send_message(chat_id, "Inviami la posizione o scrivendo dove ti trovi o con la posizione di Telegram.")
+                                    send_message(chat_id, "Inviami la posizione dove ti trovi con la posizione di Telegram.")
                                     # Set the flag for waiting for a response to True
                                     waiting_for_response2 = True
                                 else:
@@ -235,7 +236,7 @@ def downloadBenziani(url="https://www.mise.gov.it/images/exportCSV/anagrafica_im
 # bot_token = "6295982819:AAH6Ao3BtUtzFbYoYRcyfZMXv9__9HT75oo"
 from math import radians, sin, cos, sqrt,atan2
 
-def get_nearest_gas_station(fuel_type, km_per_liter, my_pos, max_distance, fuel_left):
+def get_nearest_gas_station(fuel_type, my_pos, max_distance):
     def do_haversine(lat1, lon1, lat2, lon2):
         R = 6371  # Radius of the earth in km
         dLat = radians(lat2 - lat1)
@@ -266,7 +267,7 @@ def get_nearest_gas_station(fuel_type, km_per_liter, my_pos, max_distance, fuel_
 
     # Get all gas stations with the desired fuel type
     query = "SELECT impianto.idImpianto, nomeImpianto, Latitudine, Longitudine, prezzo FROM impianto JOIN prezzi ON impianto.idImpianto = prezzi.idImpianto WHERE tipoCarburante = %s"
-    cursor.execute(query, (fuel_type,))
+    cursor.execute(query, (fuel_type.lower(),))
     gas_stations = cursor.fetchall()
     my_posi=my_pos.split(",")
     
@@ -279,7 +280,7 @@ def get_nearest_gas_station(fuel_type, km_per_liter, my_pos, max_distance, fuel_
                 filtered_gas_stations.append((g[0], g[1], distance, g[4]))
 
     # Sort gas stations by distance
-    sorted_gas_stations = sorted(filtered_gas_stations, key=lambda x: (x[2],x[3]))
+    sorted_gas_stations = sorted(filtered_gas_stations, key=lambda x: (x[3],x[2]))
 
     # If no gas station is found within the maximum distance, return None
     if not sorted_gas_stations:

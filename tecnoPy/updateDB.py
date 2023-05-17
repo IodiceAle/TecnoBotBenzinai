@@ -8,6 +8,10 @@ class MyThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         self.skipped_ids = []
+        self.benzina=["Benzina","Benzina WR 100","Benzina Plus 98","Benzina speciale","Benzina Energy 98 ottani","Blue Super","HiQ Perform+","F101","F-101","V-Power","Benzina Shell V Power","Benzina 100 ottani","Benzina 102 Ottani","R100","Verde speciale"]
+        self.gasolio=["Gasolio","Gasolio Alpino","Gasolio speciale","Gasolio Premium","Gasolio Ecoplus","Gasolio Oro Diesel","Gasolio Gelo","Gasolio artico","Gasolio Energy D","Gasolio Prestazionale","Gasolio Plus"]
+        self.diesel=["Diesel","Blue Diesel","Hi-Q Diesel","Excellium Diesel","Supreme Diesel","DieselMax","GP DIESEL","Diesel Shell V Power","E-DIESEL","Diesel e+10","S-Diesel","V-Power Diesel","HVOlution","HVO100"]
+        self.metano=["Metano","GNL","L-GNC"]
 
     def run(self):
         # while True:
@@ -19,9 +23,10 @@ class MyThread(threading.Thread):
             # else:
                 # Wait for 10 seconds before checking again
                 # time.sleep(10)
-
+                
+    
     def insert_data_from_csv(self):
-        botOSM.downloadBenziani()
+        # botOSM.downloadBenziani()
         
         mydb = mysql.connector.connect(
             host="localhost",
@@ -31,8 +36,12 @@ class MyThread(threading.Thread):
         )
         cursor = mydb.cursor()
         
+        cursor.execute('TRUNCATE TABLE prezzi')
         # drop foreign key constraint on prezzo table
-        cursor.execute('ALTER TABLE prezzi DROP FOREIGN KEY prezzi_ibfk_1')
+        try:
+            cursor.execute('ALTER TABLE prezzi DROP FOREIGN KEY prezzi_ibfk_1')
+        except:
+            print("chiave già eliminata")
         # truncate impianto table
         cursor.execute('TRUNCATE TABLE impianto')
         # recreate foreign key constraint on prezzo table
@@ -67,7 +76,7 @@ class MyThread(threading.Thread):
             self.insert_data_from_csv2()
             
     def insert_data_from_csv2(self): 
-        botOSM.downloadPrezzi()
+        # botOSM.downloadPrezzi()
         
         mydb = mysql.connector.connect(
             host="localhost",
@@ -94,13 +103,43 @@ class MyThread(threading.Thread):
                 # if int(row[3])!=1:
                 #     continue
                 # Get data from row
-                tipoC = row[1]
+                if row[1] in self.benzina:
+                    tipoC = "benzina"
+                if row[1] in self.gasolio:
+                    tipoC = "gasolio"
+                if row[1] in self.diesel:
+                    tipoC = "diesel"
+                if row[1] in self.metano:
+                    tipoC = "metano"
+                if row[1] == "GPL":
+                    tipoC = "gpl"
+                
                 # descC = row[2]
                 prezzo = float(row[2].replace(',', '.'))  # replace comma with dot as decimal separator
                 
+                if tipoC=="GPL":
+                    if prezzo<=0.3:
+                        continue
+                
+                if tipoC=="benzina":
+                    if prezzo<=1.2:
+                        continue
+                    
+                if tipoC=="gasolio":
+                    if prezzo<=1.2:
+                        continue
+                
+                if tipoC=="diesel":
+                    if prezzo<=1.0:
+                        continue
+                    
+                if tipoC=="metano":
+                    if prezzo<=0.3:
+                        continue
+                
                 # Insert into database
                 try:
-                    cursor.execute('INSERT IGNORE INTO prezzi ( tipoCarburante, prezzo, idImpianto) VALUES ( %s, %s, %s)', (tipoC, prezzo, idI))
+                    cursor.execute('INSERT IGNORE INTO prezzi ( descCarb, tipoCarburante, prezzo, idImpianto) VALUES (%s, %s, %s, %s)', (row[1],tipoC, prezzo, idI))
                 except:
                     print("An exception occurred")
                 
