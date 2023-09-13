@@ -1,0 +1,7 @@
+bot di telegram per trovare il benzinaio più vicino e economico in base al tipo di carburante utilizzato usando prezzi ufficili dei benziani presi dal sito del ministero
+ToDo:
+-migliorare la parte di richiesta delle informazioni aggiungendo maggiori controlli e 
+ restrizioni con relativi messaggi d'errore da inviare alla chat
+-implementare risposta con gps del benzianio TROVATO
+-migliorare calcolo del benzianio più economico aggiungeno anche quello più efficiente da raggiungere
+-(opzionale, aggiungere bottoni personalizzati)

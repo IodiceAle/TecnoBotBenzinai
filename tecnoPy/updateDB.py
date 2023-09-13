@@ -14,15 +14,15 @@ class MyThread(threading.Thread):
         self.metano=["Metano","GNL","L-GNC"]
 
     def run(self):
-        # while True:
-            # now = time.localtime()
-            # if now.tm_hour == 8 and now.tm_min == 10:
+        while True:
+            now = time.localtime()
+            if now.tm_hour == 8 and now.tm_min == 10:
                 self.insert_data_from_csv()
                 # Wait for 24 hours before checking again
-                # time.sleep(24 * 60 * 60)
-            # else:
+                time.sleep(24 * 60 * 60)
+            else:
                 # Wait for 10 seconds before checking again
-                # time.sleep(10)
+                time.sleep(10)
                 
     
     def insert_data_from_csv(self):
@@ -139,7 +139,7 @@ class MyThread(threading.Thread):
                 
                 # Insert into database
                 try:
-                    cursor.execute('INSERT IGNORE INTO prezzi ( descCarb, tipoCarburante, prezzo, idImpianto) VALUES (%s, %s, %s, %s)', (row[1],tipoC, prezzo, idI))
+                    cursor.execute('INSERT IGNORE INTO prezzi ( descCarburante, tipoCarburante, prezzo, idImpianto) VALUES (%s, %s, %s, %s)', (row[1],tipoC, prezzo, idI))
                 except:
                     print("An exception occurred")
                 
