@@ -1,6 +1,5 @@
 # TecnoBotBenzina
 
-# Descrizione:
 Questo progetto è stato sviluppato durante l'anno di quinta superiore ed è un bot Telegram progettato per aiutare gli utenti a trovare il benzinaio più vicino ed economico in base al tipo di carburante desiderato, utilizzando i prezzi ufficiali dei benzinai presi dal sito del Ministero.
 
 # ToDo:
